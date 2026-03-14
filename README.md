@@ -1,63 +1,54 @@
 # BlackRoad API SDKs
 
-Official client libraries for the BlackRoad OS API in JavaScript, Python, Go, and Ruby.
+Official client libraries for the BlackRoad OS platform. Python, JavaScript, and Go.
 
-## Installation
+## Install
 
 ```bash
-# JavaScript/TypeScript
-npm install blackroad
-
 # Python
-pip install blackroad
+pip install ./python
+
+# JavaScript
+npm install ./javascript
 
 # Go
 go get github.com/blackboxprogramming/blackroad-api-sdks/go
-
-# Ruby
-gem install blackroad
 ```
 
 ## Quick Start
 
-### JavaScript / TypeScript
-
-```typescript
-import { BlackRoadClient } from 'blackroad'
-
-const client = new BlackRoadClient({ apiKey: 'your-api-key' })
-
-// Products
-const products = await client.products.list()
-
-// Deployments
-const deployment = await client.deployments.create({
-  name: 'my-app',
-  environment: 'production'
-})
-
-// Agents
-const agent = await client.agents.get('sentinel')
-```
-
 ### Python
 
 ```python
-from blackroad import BlackRoadClient
+from blackroad import BlackRoad
 
-client = BlackRoadClient(api_key='your-api-key')
+br = BlackRoad()
 
-# Products
-products = client.products.list()
+# Fleet status
+status = br.fleet.status()
 
-# Deployments
-deployment = client.deployments.create(
-    name='my-app',
-    environment='production'
-)
+# Post to Slack
+br.slack.post("deploy complete")
 
-# Health check
-status = client.health()
+# AI inference (requires Ollama access)
+response = br.ai.generate("qwen2.5:7b", "explain edge computing in one sentence")
+```
+
+### JavaScript
+
+```javascript
+const { BlackRoad } = require('@blackroad/sdk')
+
+const br = new BlackRoad()
+
+// Fleet status
+const status = await br.fleet.status()
+
+// Post to Slack
+await br.slack.post('deploy complete')
+
+// AI inference
+const response = await br.ai.generate('qwen2.5:7b', 'explain edge computing')
 ```
 
 ### Go
@@ -65,62 +56,76 @@ status = client.health()
 ```go
 package main
 
-import "github.com/blackboxprogramming/blackroad-api-sdks/go"
+import (
+    "fmt"
+    blackroad "github.com/blackboxprogramming/blackroad-api-sdks/go"
+)
 
 func main() {
-    client := blackroad.NewClient("your-api-key")
+    client := blackroad.New()
 
-    products, err := client.Products.List()
-    deployment, err := client.Deployments.Create(&blackroad.DeploymentInput{
-        Name:        "my-app",
-        Environment: "production",
-    })
+    status, _ := client.Fleet.Status()
+    fmt.Println(status)
+
+    client.Slack.Post("deploy complete")
 }
-```
-
-### Ruby
-
-```ruby
-require 'blackroad'
-
-client = Blackroad::Client.new(api_key: 'your-api-key')
-
-products = client.products.list
-deployment = client.deployments.create(
-  name: 'my-app',
-  environment: 'production'
-)
-```
-
-## Project Structure
-
-```
-├── javascript/     # JS/TS SDK (index.js)
-├── javascript-sdk.ts  # TypeScript SDK with full types
-├── python/         # Python SDK (blackroad.py)
-├── python-sdk.py   # Python SDK standalone
-├── go/             # Go SDK (blackroad.go)
-├── go-sdk.go       # Go SDK standalone
-└── ruby-sdk.rb     # Ruby SDK
 ```
 
 ## API Reference
 
+### Fleet
+
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| `products.list()` | GET /products | List all products |
-| `products.get(id)` | GET /products/:id | Get product details |
-| `deployments.list()` | GET /deployments | List deployments |
-| `deployments.create()` | POST /deployments | Create deployment |
-| `agents.list()` | GET /agents | List AI agents |
-| `agents.get(id)` | GET /agents/:id | Get agent status |
-| `health()` | GET /healthz | Health check |
+| `fleet.status()` | GET /fleet | All node status (temp, disk, RAM, uptime) |
+| `fleet.all()` | GET /all | Full data: infra, GitHub, analytics |
+| `fleet.health()` | GET /health | Stats API health check |
 
-## Documentation
+### Slack
 
-- API docs: [docs.blackroad.io](https://docs.blackroad.io)
-- BlackRoad API server: [blackroad-api](https://github.com/blackboxprogramming/blackroad-api)
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `slack.post(text)` | POST /post | Post to default channel |
+| `slack.alert(text)` | POST /alert | Post alert |
+| `slack.deploy(text)` | POST /deploy | Deploy notification |
+| `slack.status()` | GET /status | Hub status |
+
+### AI (requires Ollama gateway access)
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `ai.generate(model, prompt)` | POST /api/generate | Text generation |
+| `ai.chat(model, messages)` | POST /api/chat | Chat completion |
+| `ai.embed(model, input)` | POST /api/embed | Embeddings |
+| `ai.models()` | GET /api/tags | List available models |
+
+## Live Endpoints
+
+| Service | URL |
+|---------|-----|
+| Stats API | `stats-blackroad.amundsonalexa.workers.dev` |
+| Slack Hub | `blackroad-slack.amundsonalexa.workers.dev` |
+| Ollama (local) | `localhost:11434` |
+
+## Structure
+
+```
+blackroad-api-sdks/
+  python/
+    blackroad.py      # SDK source
+    pyproject.toml    # Package config
+  javascript/
+    index.js          # SDK source
+    package.json      # Package config
+  go/
+    blackroad.go      # SDK source
+    go.mod            # Module config
+```
 
 ## License
 
-Copyright 2026 BlackRoad OS, Inc. — Alexa Amundson. All rights reserved.
+Copyright 2024-2026 BlackRoad OS, Inc. All rights reserved. See LICENSE.
+
+---
+
+BlackRoad OS -- Pave Tomorrow.
